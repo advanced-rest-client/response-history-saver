@@ -1,0 +1,96 @@
+<!doctype html>
+<!--
+@license
+Copyright 2017 The Advanced REST client authors <arc@mulesoft.com>
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+    <link rel="import" href="../response-history-saver.html">
+  </head>
+  <body>
+
+    <test-fixture id="basic">
+      <template>
+        <response-history-saver></response-history-saver>
+      </template>
+    </test-fixture>
+
+    <script>
+    /* global fixture, assert */
+    suite('_computeHistoryStoreUrl()', function() {
+      var element;
+      setup(function() {
+        element = fixture('basic');
+      });
+
+      test('Returns undefined for missing argument', function() {
+        var result = element._computeHistoryStoreUrl();
+        assert.isUndefined(result);
+      });
+
+      test('Normalizes url for domain', function() {
+        var url = 'https://domain.com';
+        var result = element._computeHistoryStoreUrl(url);
+        assert.equal(result, url + '/');
+      });
+
+      test('Normalizes url for resource', function() {
+        var url = 'https://domain.com/path';
+        var result = element._computeHistoryStoreUrl(url);
+        assert.equal(result, url);
+      });
+
+      test('Normalizes url for path', function() {
+        var url = 'https://domain.com/path/';
+        var result = element._computeHistoryStoreUrl(url);
+        assert.equal(result, url);
+      });
+
+      test('Normalizes url for query parameters', function() {
+        var url = 'https://domain.com/path/';
+        var result = element._computeHistoryStoreUrl(url + '?a=b');
+        assert.equal(result, url);
+      });
+
+      test('Normalizes url for resource and query parameters', function() {
+        var url = 'https://domain.com/path';
+        var result = element._computeHistoryStoreUrl(url + '?a=b');
+        assert.equal(result, url);
+      });
+
+      test('Normalizes url for domain and query parameters', function() {
+        var url = 'https://domain.com/';
+        var result = element._computeHistoryStoreUrl(url + '?a=b');
+        assert.equal(result, url);
+      });
+
+      test('Normalizes url for hash', function() {
+        var url = 'https://domain.com/';
+        var result = element._computeHistoryStoreUrl(url + '#abc');
+        assert.equal(result, url);
+      });
+
+      test('Normalizes url for hash and query parameters', function() {
+        var url = 'https://domain.com/';
+        var result = element._computeHistoryStoreUrl(url + '?a=b#abc');
+        assert.equal(result, url);
+      });
+    });
+    </script>
+
+  </body>
+</html>

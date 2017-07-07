@@ -1,0 +1,62 @@
+<!doctype html>
+<!--
+@license
+Copyright 2017 The Advanced REST client authors <arc@mulesoft.com>
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+    <link rel="import" href="../response-history-saver.html">
+  </head>
+  <body>
+
+    <test-fixture id="basic">
+      <template>
+        <response-history-saver></response-history-saver>
+      </template>
+    </test-fixture>
+
+    <script>
+    /* global fixture, assert */
+    suite('_computeStartTime()', function() {
+      var element;
+      setup(function() {
+        element = fixture('basic');
+      });
+
+      test('Computes time from undefined argument', function() {
+        var result = element._computeStartTime();
+        assert.isAbove(result, 0);
+      });
+
+      test('Computes time from missing property', function() {
+        var result = element._computeStartTime({});
+        assert.isAbove(result, 0);
+      });
+
+      test('Computes time from set time', function() {
+        var t = Date.now();
+        var result = element._computeStartTime({
+          startTime: t
+        });
+        assert.equal(result, t);
+      });
+
+    });
+    </script>
+
+  </body>
+</html>

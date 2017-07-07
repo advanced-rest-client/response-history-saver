@@ -1,0 +1,68 @@
+<!doctype html>
+<!--
+@license
+Copyright 2017 The Advanced REST client authors <arc@mulesoft.com>
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+    <link rel="import" href="../response-history-saver.html">
+  </head>
+  <body>
+
+    <test-fixture id="basic">
+      <template>
+        <response-history-saver></response-history-saver>
+      </template>
+    </test-fixture>
+
+    <script>
+    /* global fixture, assert */
+    suite('_computeHistoryDataId()', function() {
+      var element;
+      var URL = 'https://api.domain.com/endpoint';
+      var METHOD = 'GET';
+      var id;
+      setup(function() {
+        element = fixture('basic');
+        id = element._computeHistoryDataId(URL, METHOD);
+      });
+
+      test('Contains 3 parts', function() {
+        assert.lengthOf(id.split('/'), 3);
+      });
+
+      test('Part 1 is URL endoded url', function() {
+        var encoded = id.split('/')[0];
+        assert.equal(encoded, encodeURIComponent(URL));
+      });
+
+      test('Part 2 is method', function() {
+        var encoded = id.split('/')[1];
+        assert.equal(encoded, METHOD);
+      });
+
+      test('Part 3 is UUID', function() {
+        var uuid = id.split('/')[2];
+        var result = /[a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12}/.test(uuid);
+        assert.isTrue(result);
+      });
+
+    });
+    </script>
+
+  </body>
+</html>
