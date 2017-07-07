@@ -18,6 +18,9 @@
   "globals": {
     "Polymer": true,
     "Promise": true,
-    "PouchDB": true
+    "PouchDB": true,
+    "Request": true,
+    "Response": true,
+    "Headers": true
   }
 }
