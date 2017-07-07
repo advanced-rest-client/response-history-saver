@@ -1,7 +1,7 @@
 {
   "name": "response-history-saver",
   "description": "An element that saves requests history in a datastore",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "Apache-2.0 OR CC-BY-4.0",
   "authors": [
     "The Advanced REST client authors <arc@mulesoft.com>"
