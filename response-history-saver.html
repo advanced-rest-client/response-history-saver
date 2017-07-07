@@ -1,6 +1,6 @@
 <!--
 @license
-Copyright 2016 The Advanced REST client authors <arc@mulesoft.com>
+Copyright 2017 The Advanced REST client authors <arc@mulesoft.com>
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of
 the License at
@@ -16,6 +16,7 @@ the License.
 <link rel="import" href="../app-pouchdb/pouchdb.html">
 <link rel="import" href="../uuid-generator/uuid-generator.html">
 <link rel="import" href="../arc-headers/arc-headers.html">
+<link rel="import" href="../url/url-polyfill.html">
 <!--
 # response-history-saver element
 
@@ -163,6 +164,17 @@ Polymer({
    * datastore.
    */
   _saveHistoryData: function(request, response, requestBuffer, responseBuffer, eventTimings) {
+    var doc = this._createHistoryDataModel(request, response, requestBuffer,
+      responseBuffer, eventTimings);
+    var db = this._dbData;
+    return db.put(doc)
+    .catch(function(e) {
+      return this._handleException(e);
+    }.bind(this));
+  },
+  // Creates a data store model for `_saveHistoryData`
+  _createHistoryDataModel: function(request, response, requestBuffer,
+    responseBuffer, eventTimings) {
     var responseHeaders = this._computeHeaders(response);
     var requestHeaders = this._computeHeaders(request);
     var timings = this._computeTimings(eventTimings);
@@ -172,7 +184,7 @@ Polymer({
     var requestHeadersSize = this._calculateBytes(requestHeaders);
     var responseHeadersSize = this._calculateBytes(responseHeaders);
     var requestStartTime = this._computeStartTime(eventTimings);
-    var url = this._getHistoryStoreUrl(request.url);
+    var url = this._computeHistoryStoreUrl(request.url);
     var id = this._computeHistoryDataId(url);
     var requestPayload = this._computePayloadString(requestBuffer);
     var responsePayload = this._computePayloadString(responseBuffer);
@@ -205,11 +217,7 @@ Polymer({
         }
       }
     };
-    var db = this._dbData;
-    return db.put(doc)
-      .catch(function(e) {
-        return this._handleException(e);
-      }.bind(this));
+    return doc;
   },
   /**
    * Updates the requests history data store.
@@ -248,7 +256,7 @@ Polymer({
       })
       .catch(function(e) {
         if (e.status !== 404) {
-          return this._handleException(e);
+          return context._handleException(e);
         }
         return context._createHistoryInserDocument(null, key, time, request,
           payload);
@@ -260,7 +268,7 @@ Polymer({
       .then(function(result) {
         doc._id = result.id;
         doc._rev = result.rev;
-        this.fire('history-object-changed', {
+        context.fire('history-object-changed', {
           id: result.id,
           rev: result.rev,
           item: doc
@@ -268,7 +276,8 @@ Polymer({
         return doc;
       })
       .catch(function(e) {
-        return this._handleException(e);
+
+        return context._handleException(e);
       });
   },
 
@@ -310,7 +319,7 @@ Polymer({
    * @param {?Object} timings Timings object from the response event.
    * @return {Number} Timestamp of the request start.
    */
-  _computeStartDate: function(eventTimings) {
+  _computeStartTime: function(eventTimings) {
     eventTimings = eventTimings || {};
     return eventTimings.startTime ?
       new Date(eventTimings.startTime).getTime() :
@@ -342,9 +351,12 @@ Polymer({
    * Computes headers string from request/response object.
    *
    * @param {Request|Response} obj A request or response object.
-   * @return {String} List of headers in the object.
+   * @return {String} HTTP string headers in the object.
    */
   _computeHeaders: function(obj) {
+    if (!obj || !obj.headers) {
+      return '';
+    }
     var parts = [];
     obj.headers.forEach(function(value, key) {
       parts.push(key + ': ' + value);
@@ -358,19 +370,15 @@ Polymer({
    * @param {String} url A URL to process
    * @return {String}
    */
-  _getHistoryStoreUrl: function(url) {
+  _computeHistoryStoreUrl: function(url) {
     try {
       url = new URL(url);
       url.search = '';
       url.hash = '';
       url = url.toString();
-    } catch (e) {
-      var i = url.indexOf('?');
-      if (i !== -1) {
-        url = url.substr(0, i);
-      } else {
-        url = url;
-      }
+    } catch (e) {}
+    if (url) {
+      url = url.replace(/\?#/g, '');
     }
     return url;
   },
@@ -457,9 +465,6 @@ Polymer({
    */
   _arrayBufferToString: function(buffer) {
     if (!!buffer.buffer) {
-      // Not a ArrayBuffer, need and instance of AB
-      // It can't just get buff.buffer because it will use original buffer if the buff is a slice
-      // of it.
       var b = buffer.slice(0);
       buffer = b.buffer;
     }
@@ -506,7 +511,6 @@ Polymer({
       'message': ['Url history model', e],
       'level': 'error'
     });
-    console.error('Url history model', e);
     var message;
     if (e instanceof Error) {
       message = e.message;
@@ -518,6 +522,7 @@ Polymer({
       description: message,
       fatal: true
     });
+    console.error('Url history model', e);
     throw new Error(e.message || e);
   }
 });
