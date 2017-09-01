@@ -111,8 +111,8 @@ Polymer({
    * Handler to the `response-ready` event
    */
   _afterRequestHandler: function(e) {
-    var response = e.detail.response;
-    var request = e.detail.request;
+    var response = e.detail.response.clone();
+    var request = e.detail.request.clone();
     var timings = e.detail.timings;
     // Async so the response can be rendered to the user faster.
     this.async(function() {
@@ -149,7 +149,7 @@ Polymer({
     if (!request.arrayBuffer || ['HEAD', 'GET'].indexOf(request.method) !== -1) {
       return Promise.resolve();
     }
-    return request.clone().arrayBuffer();
+    return request.arrayBuffer();
   },
   /**
    * Saves history data for history analysis in the data store.
