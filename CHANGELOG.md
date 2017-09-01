@@ -1,3 +1,9 @@
+<a name="0.0.4"></a>
+## [0.0.4](https://github.com/advanced-rest-client/response-history-saver/compare/0.0.3...0.0.4) (2017-09-01)
+
+
+
+
 <a name="0.0.3"></a>
 ## [0.0.3](https://github.com/advanced-rest-client/response-history-saver/compare/0.0.2...0.0.3) (2017-09-01)
 
