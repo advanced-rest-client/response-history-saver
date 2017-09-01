@@ -130,7 +130,7 @@ Polymer({
         requestBodyBuffer = buffer;
       })
       .then(function() {
-        return this._preparePayload(response);
+        return context._preparePayload(response);
       })
       .catch(function() {})
       .then(function(buffer) {
