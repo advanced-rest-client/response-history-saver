@@ -65,6 +65,30 @@ the License.
           assert.typeOf(body, 'arraybuffer');
         });
       });
+
+      test('Resolves to arrayBuffer for FormData', function() {
+        var fd = new FormData();
+        fd.append('test', test);
+        var request = ArcRequestHelper.createRequest({
+          method: 'POST',
+          body: fd
+        });
+        return element._preparePayload(request)
+        .then(function(body) {
+          assert.typeOf(body, 'arraybuffer');
+        });
+      });
+
+      test('Resolves to arrayBuffer for File', function() {
+        var request = ArcRequestHelper.createRequest({
+          method: 'POST',
+          body: new Blob(['test'], {'type': 'text/plain'})
+        });
+        return element._preparePayload(request)
+        .then(function(body) {
+          assert.typeOf(body, 'arraybuffer');
+        });
+      });
     });
     </script>
 
