@@ -1,7 +1,7 @@
 {
   "name": "response-history-saver",
   "description": "An element that saves requests history in a datastore",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "Apache-2.0 OR CC-BY-4.0",
   "authors": [
     "The Advanced REST client authors <arc@mulesoft.com>"
@@ -23,8 +23,8 @@
     "arc-polyfills": "advanced-rest-client/arc-polyfills#^0.1.8",
     "app-pouchdb": "advanced-rest-client/app-pouchdb#^1.0.0",
     "uuid-generator": "advanced-rest-client/uuid-generator#^1.0.4",
-    "arc-headers": "advanced-rest-client/arc-headers#^0.1.2",
-    "url": "advanced-rest-client/URL#^0.6.0"
+    "url": "advanced-rest-client/URL#^0.6.0",
+    "fetch": "advanced-rest-client/fetch#2.1.0-arc"
   },
   "devDependencies": {
     "iron-component-page": "polymerelements/iron-component-page#1.0.0",

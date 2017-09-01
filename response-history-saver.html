@@ -15,8 +15,9 @@ the License.
 <link rel="import" href="../arc-polyfills/arc-polyfills.html">
 <link rel="import" href="../app-pouchdb/pouchdb.html">
 <link rel="import" href="../uuid-generator/uuid-generator.html">
-<link rel="import" href="../arc-headers/arc-headers.html">
 <link rel="import" href="../url/url-polyfill.html">
+<link rel="import" href="../fetch-polyfill/fetch-polyfill.html">
+
 <!--
 # response-history-saver element
 
@@ -111,8 +112,8 @@ Polymer({
    * Handler to the `response-ready` event
    */
   _afterRequestHandler: function(e) {
-    var response = e.detail.response;
-    var request = e.detail.request;
+    var response = e.detail.response.clone();
+    var request = e.detail.request.clone();
     var timings = e.detail.timings;
     // Async so the response can be rendered to the user faster.
     this.async(function() {
@@ -130,7 +131,7 @@ Polymer({
         requestBodyBuffer = buffer;
       })
       .then(function() {
-        return this._preparePayload(response);
+        return context._preparePayload(response);
       })
       .catch(function() {})
       .then(function(buffer) {
@@ -149,7 +150,7 @@ Polymer({
     if (!request.arrayBuffer || ['HEAD', 'GET'].indexOf(request.method) !== -1) {
       return Promise.resolve();
     }
-    return request.clone().arrayBuffer();
+    return request.arrayBuffer();
   },
   /**
    * Saves history data for history analysis in the data store.
