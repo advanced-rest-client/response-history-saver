@@ -77,6 +77,10 @@ the License.
           assert.typeOf(model._id, 'string');
         });
 
+        test('_id has no "undefined" properties', function() {
+          assert.isTrue(model._id.indexOf('undefined') === -1);
+        });
+
         test('Does not contain _rev', function() {
           assert.isUndefined(model._rev);
         });

@@ -186,7 +186,7 @@ Polymer({
     var responseHeadersSize = this._calculateBytes(responseHeaders);
     var requestStartTime = this._computeStartTime(eventTimings);
     var url = this._computeHistoryStoreUrl(request.url);
-    var id = this._computeHistoryDataId(url);
+    var id = this._computeHistoryDataId(url, request.method);
     var requestPayload = this._computePayloadString(requestBuffer);
     var responsePayload = this._computePayloadString(responseBuffer);
 
@@ -277,7 +277,6 @@ Polymer({
         return doc;
       })
       .catch(function(e) {
-
         return context._handleException(e);
       });
   },
