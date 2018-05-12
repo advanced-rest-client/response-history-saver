@@ -1,3 +1,18 @@
+<a name="1.0.0"></a>
+# [1.0.0](https://github.com/advanced-rest-client/response-history-saver/compare/0.0.3...1.0.0) (2018-05-12)
+
+
+### Fix
+
+* Added missing method definition ([8b0808224b6a34260c901c441c7b77988c9e4938](https://github.com/advanced-rest-client/response-history-saver/commit/8b0808224b6a34260c901c441c7b77988c9e4938))
+* Fixed tests for fetch standard. ([cb688fe8eca2c389c9c9ad8ae0d00385ebead248](https://github.com/advanced-rest-client/response-history-saver/commit/cb688fe8eca2c389c9c9ad8ae0d00385ebead248))
+
+### Update
+
+* Removed invalid test ([cfe750bf1ceae08bee3c43943f373e0bb254dbbd](https://github.com/advanced-rest-client/response-history-saver/commit/cfe750bf1ceae08bee3c43943f373e0bb254dbbd))
+
+
+
 <a name="0.0.5"></a>
 ## [0.0.5](https://github.com/advanced-rest-client/response-history-saver/compare/0.0.3...0.0.5) (2017-11-05)
 
