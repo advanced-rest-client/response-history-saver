@@ -286,7 +286,14 @@ class ResponseHistorySaver extends Polymer.Element {
       url = url.toString();
     } catch (e) {}
     if (url) {
-      url = url.replace(/\?#/g, '');
+      let i = url.indexOf('?');
+      if (i !== -1) {
+        url = url.substr(0, i);
+      }
+      i = url.indexOf('#');
+      if (i !== -1) {
+        url = url.substr(0, i);
+      }
     }
     return url;
   }
