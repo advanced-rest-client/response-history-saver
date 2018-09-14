@@ -19,7 +19,7 @@ the License.
  *
  * This element supports Advanced REST Client project.
  *
- * It handles the `response-ready` event asynchronously and updates both
+ * It handles the `api-response` event asynchronously and updates both
  * requests history and history data data store.
  *
  * The requests history keeps a daily record of requests made by the application.
@@ -74,12 +74,12 @@ class ResponseHistorySaver extends Polymer.Element {
 
   connectedCallback() {
     super.connectedCallback();
-    window.addEventListener('response-ready', this._afterRequestHandler);
+    window.addEventListener('api-response', this._afterRequestHandler);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    window.removeEventListener('response-ready', this._afterRequestHandler);
+    window.removeEventListener('api-response', this._afterRequestHandler);
   }
 
   /**
@@ -90,7 +90,7 @@ class ResponseHistorySaver extends Polymer.Element {
     return new PouchDB('history-data');
   }
   /**
-   * Handler for the `response-ready` event
+   * Handler for the `api-response` event
    *
    * @param {CustomEvent} e
    */
