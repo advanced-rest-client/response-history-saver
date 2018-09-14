@@ -12,7 +12,6 @@ License for the specific language governing permissions and limitations under
 the License.
 -->
 <link rel="import" href="../polymer/polymer-element.html">
-<link rel="import" href="../app-pouchdb/pouchdb.html">
 <link rel="import" href="../uuid-generator/uuid-generator.html">
 <script>
 /**
@@ -32,25 +31,13 @@ the License.
  *
  * ## Data model
  *
- * ### request history
- *
- * Property | Type | Description
- * ----------------|-------------|-------------
- * `_id` | `String` | PouchDB database key. Combination of current day (YYYY-MM-dd) + URI encoded request URL and HTTP method name. Each value is separated with a forward slash (/).
- * `created` | `Number` | Timestamp of a time when the record has been created
- * `updated` | `Number` | Timestamp of a time when the record has been updated for the last time
- * `headers` | `String` | List of request headers as a HTTP header string. Can be empty string
- * `method` | `String` | Can be anything but most probably it is a valid HTTP method name
- * `payload` | `String` | Request body. It is always transformed to string.
- * `url` | `String` | the URL of the request.
- *
  * ### request data
  *
  * Note that payload is always string even if the response body was different type.
  *
  * Property | Type | Description
  * ----------------|-------------|-------------
- * `_id` | `String` | PouchDB database key. Combination of URI encoded request URL, HTTP method name and generated UUID. Each value is separated with a forward slash (/).
+ * `_id` | `String` | PouchDB database key.
  * `timings` | `Object` | Valid HAR 1.2 timings object.
  * `totalTime` | `Number` | Number of milliseconds that took to perform the full request.
  * `created` | `Number` | Timestamp of the entry
@@ -78,7 +65,7 @@ the License.
  * @memberof LogicElements
  */
 class ResponseHistorySaver extends Polymer.Element {
-  static get is() { return 'response-history-saver'; }
+  static get is() {return 'response-history-saver';}
 
   constructor() {
     super();
@@ -103,13 +90,9 @@ class ResponseHistorySaver extends Polymer.Element {
     return new PouchDB('history-data');
   }
   /**
-   * @return {PouchDB} A PouchDB instance for the history-requests store.
-   */
-  get _dbHistory() {
-    return new PouchDB('history-requests');
-  }
-  /**
-   * Handler to the `response-ready` event
+   * Handler for the `response-ready` event
+   *
+   * @param {CustomEvent} e
    */
   _afterRequestHandler(e) {
     const response = e.detail.response;
@@ -128,7 +111,8 @@ class ResponseHistorySaver extends Polymer.Element {
    */
   saveHistory(request, response, timings) {
     return this._saveHistoryData(request, response, timings)
-    .then(() => this._updateHistory(request, timings));
+    .then(() => this._updateHistory(request, timings))
+    .catch((cause) => this._handleException(cause));
   }
   /**
    * Saves history data for history analysis in the data store.
@@ -205,59 +189,34 @@ class ResponseHistorySaver extends Polymer.Element {
    * been updated in the data store.
    */
   _updateHistory(request, eventTimings) {
-    const requestStartTime = this._computeStartTime(eventTimings);
-    const today = this._getDayToday(requestStartTime);
-    const key = today + '/' + encodeURIComponent(request.url) + '/' +
-      request.method;
-    const requestPayload = this._computePayloadString(request.payload);
-    return this._writeHistoryItem(key, request, requestPayload,
-      requestStartTime);
-  }
-  /**
-   * Performs a write to the history-request store.
-   */
-  _writeHistoryItem(key, request, payload, time) {
-    const db = this._dbHistory;
-    let doc;
-    return db.get(key)
-    .then((doc) => this._createHistoryInserDocument(doc, key, time, request, payload))
-    .catch((e) => {
-      if (e.status !== 404) {
-        return this._handleException(e);
+    const updated = this._computeStartTime(eventTimings);
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    let id = d.getTime();
+    id += '/' + encodeURIComponent(request.url);
+    id += '/' + request.method;
+    const doc = {
+      _id: id,
+      updated,
+      created: updated,
+      headers: request.headers,
+      method: request.method,
+      payload: request.payload,
+      url: request.url
+    };
+    const e = new CustomEvent('save-history', {
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+      detail: {
+        request: doc
       }
-      return this._createHistoryInserDocument(null, key, time, request, payload);
-    })
-    .then(function(_doc) {
-      doc = _doc;
-      return db.put(doc);
-    })
-    .then((result) => {
-      doc._id = result.id;
-      doc._rev = result.rev;
-      this.dispatchEvent(new CustomEvent('history-object-changed', {
-        composed: true,
-        bubbles: true,
-        detail: {
-          id: result.id,
-          rev: result.rev,
-          item: doc
-        }
-      }));
-      return doc;
-    })
-    .catch((e) => context._handleException(e));
-  }
-
-  _createHistoryInserDocument(doc, key, time, request, payload) {
-    doc = doc || {};
-    doc._id = doc._id || key;
-    doc.created = doc.created || time;
-    doc.updated = time;
-    doc.headers = request.headers;
-    doc.method = request.method;
-    doc.payload = payload;
-    doc.url = request.url;
-    return doc;
+    });
+    this.dispatchEvent(e);
+    if (!e.defaultPrevented) {
+      return Promise.reject(new Error('request model not found'));
+    }
+    return e.detail.result;
   }
   /**
    * Computes a valid timings object as descrived in HAR 1.2 spec.
@@ -283,7 +242,7 @@ class ResponseHistorySaver extends Polymer.Element {
    * property it will compute timestamp from it. Otherwise it will use
    * current time.
    *
-   * @param {?Object} timings Timings object from the response event.
+   * @param {?Object} eventTimings Timings object from the response event.
    * @return {Number} Timestamp of the request start.
    */
   _computeStartTime(eventTimings) {
@@ -367,7 +326,7 @@ class ResponseHistorySaver extends Polymer.Element {
         s += 2;
       }
       if (code >= 0xDC00 && code <= 0xDFFF) {
-        i--; //trail surrogate
+        i--; // trail surrogate
       }
     }
     return s;
@@ -404,6 +363,9 @@ class ResponseHistorySaver extends Polymer.Element {
     if (typeof input === 'string') {
       return input;
     }
+    if (input instanceof Uint8Array) {
+      return input.toString();
+    }
     if (input instanceof ArrayBuffer) {
       return this._arrayBufferToString(input);
     }
@@ -411,8 +373,8 @@ class ResponseHistorySaver extends Polymer.Element {
   }
   /**
    * Convert ArrayBuffer to readable form
-   * @param {ArrayBuffer} buff
-   * @returns {String} Converted string
+   * @param {ArrayBuffer} buffer
+   * @return {String} Converted string
    */
   _arrayBufferToString(buffer) {
     if (!!buffer.buffer) {
@@ -436,22 +398,6 @@ class ResponseHistorySaver extends Polymer.Element {
       }
     } catch (e) {}
     return str;
-  }
-  /**
-   * Setss hours, minutes, seconds and ms to 0 and returns timestamp.
-   *
-   * @return {Number} Timestamp to the day.
-   */
-  _getDayToday(timestamp) {
-    const d = new Date(timestamp);
-    if (isNaN(d.getTime())) {
-      throw new Error('Invalid timestamp: ' + timestamp);
-    }
-    d.setMilliseconds(0);
-    d.setSeconds(0);
-    d.setMinutes(0);
-    d.setHours(0);
-    return d.getTime();
   }
   /**
    * Handles exceptions to log message ad throws the same exception

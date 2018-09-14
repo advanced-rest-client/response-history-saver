@@ -6,10 +6,12 @@
     <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
     <script src="../../web-component-tester/browser.js"></script>
     <link rel="import" href="../response-history-saver.html">
+    <link rel="import" href="../../app-pouchdb/pouchdb.html">
+    <link rel="import" href="../../arc-models/request-model.html">
     <link rel="import" href="../../arc-data-generator/arc-data-generator.html">
   </head>
   <body>
-
+    <request-model></request-model>
     <test-fixture id="basic">
       <template>
         <response-history-saver></response-history-saver>
