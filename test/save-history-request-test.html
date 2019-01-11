@@ -1,29 +1,17 @@
 <!doctype html>
-<!--
-@license
-Copyright 2017 The Advanced REST client authors <arc@mulesoft.com>
-Licensed under the Apache License, Version 2.0 (the "License"); you may not
-use this file except in compliance with the License. You may obtain a copy of
-the License at
-http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-License for the specific language governing permissions and limitations under
-the License.
--->
 <html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
     <script src="../../web-component-tester/browser.js"></script>
-    <script src="../../arc-demo-helpers/arc-requests-helper.js"></script>
     <link rel="import" href="../response-history-saver.html">
+    <link rel="import" href="../../app-pouchdb/pouchdb.html">
+    <link rel="import" href="../../arc-models/request-model.html">
+    <link rel="import" href="../../arc-data-generator/arc-data-generator.html">
   </head>
   <body>
-
+    <request-model></request-model>
     <test-fixture id="basic">
       <template>
         <response-history-saver></response-history-saver>
@@ -31,25 +19,19 @@ the License.
     </test-fixture>
 
     <script>
-    /* global fixture, assert, ArcRequestHelper */
+    /* global DataGenerator */
     suite('Saving history request data', function() {
-      function getBuffer() {
-        var buffer = new ArrayBuffer(8);
-        var view = new DataView(buffer);
-        for (var i = 0; i < 8; i++) {
-          view.setInt8(i, 42);
-        }
-        return buffer;
-      }
-
-      var element;
-      var request;
-      var timings;
-      var requestBuffer;
+      let element;
+      let request;
+      let timings;
       function initVariables() {
         element = fixture('basic');
-        requestBuffer = getBuffer();
-        request = ArcRequestHelper.createRequest();
+        request = {
+          url: 'https://domain.com/path/?query=value',
+          method: 'POST',
+          payload: 'hello world',
+          headers: 'content-type: text/plain\ncontent-length: 11'
+        };
         timings = {
           connect: 2.008,
           receive: 24.1769,
@@ -62,29 +44,29 @@ the License.
 
       suite('_updateHistory()', function() {
         suiteTeardown(function() {
-          return ArcRequestHelper.deleteDatabases('history-requests');
+          return DataGenerator.destroyHistoryData();
         });
 
         setup(function() {
           initVariables();
         });
 
-        var insertedObject;
+        let insertedObject;
         test('Saves new model to the datastore', function() {
-          return element._updateHistory(request, requestBuffer, timings)
-            .then(function(doc) {
-              insertedObject = doc;
-              assert.isDefined(doc._id);
-              assert.isDefined(doc._rev);
-            });
+          return element._updateHistory(request, timings)
+          .then(function(doc) {
+            insertedObject = doc;
+            assert.isDefined(doc._id);
+            assert.isDefined(doc._rev);
+          });
         });
 
         test('Updates existing model in the datastore', function() {
-          return element._updateHistory(request, requestBuffer, timings)
-            .then(function(doc) {
-              assert.equal(doc._id, insertedObject._id);
-              assert.notEqual(doc._rev, insertedObject._rev);
-            });
+          return element._updateHistory(request, timings)
+          .then(function(doc) {
+            assert.equal(doc._id, insertedObject._id);
+            assert.notEqual(doc._rev, insertedObject._rev);
+          });
         });
       });
     });
