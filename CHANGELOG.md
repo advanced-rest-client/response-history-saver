@@ -84,3 +84,24 @@
 
 
 
+# [2.0.0](https://github.com/advanced-rest-client/response-history-saver/compare/0.0.3...2.0.0) (2019-01-25)
+
+
+### Breaking
+
+* Updating to new ARC events API with `api-response` event ([7f7e3cf9b878b952c3d1f2d56cfe7084b0f59138](https://github.com/advanced-rest-client/response-history-saver/commit/7f7e3cf9b878b952c3d1f2d56cfe7084b0f59138))
+
+### Fix
+
+* Added missing method definition ([8b0808224b6a34260c901c441c7b77988c9e4938](https://github.com/advanced-rest-client/response-history-saver/commit/8b0808224b6a34260c901c441c7b77988c9e4938))
+* Adding support for errored response ([0940a21ca1021b3facd148e2736672091b26e276](https://github.com/advanced-rest-client/response-history-saver/commit/0940a21ca1021b3facd148e2736672091b26e276))
+* Fixed tests for fetch standard. ([cb688fe8eca2c389c9c9ad8ae0d00385ebead248](https://github.com/advanced-rest-client/response-history-saver/commit/cb688fe8eca2c389c9c9ad8ae0d00385ebead248))
+* Fixing URL building for old safari ([0e2cda165e6df003f9ac08dd91b723c9d56f4dbc](https://github.com/advanced-rest-client/response-history-saver/commit/0e2cda165e6df003f9ac08dd91b723c9d56f4dbc))
+
+### Update
+
+* Moving history storage logic to `arc-models/request-model` ([803c09389e290a59001c25bc310ca5f401fb5e9d](https://github.com/advanced-rest-client/response-history-saver/commit/803c09389e290a59001c25bc310ca5f401fb5e9d))
+* Removed invalid test ([cfe750bf1ceae08bee3c43943f373e0bb254dbbd](https://github.com/advanced-rest-client/response-history-saver/commit/cfe750bf1ceae08bee3c43943f373e0bb254dbbd))
+
+
+
