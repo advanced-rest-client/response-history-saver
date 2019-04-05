@@ -5,11 +5,12 @@
  *   https://github.com/Polymer/tools/tree/master/packages/gen-typescript-declarations
  *
  * To modify these typings, edit the source file(s):
- *   response-history-saver.html
+ *   response-history-saver.js
  */
 
-/// <reference path="../polymer/types/polymer-element.d.ts" />
-/// <reference path="../uuid-generator/uuid-generator.d.ts" />
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
 
 declare namespace LogicElements {
 
@@ -18,7 +19,7 @@ declare namespace LogicElements {
    *
    * This element supports Advanced REST Client project.
    *
-   * It handles the `response-ready` event asynchronously and updates both
+   * It handles the `api-response` event asynchronously and updates both
    * requests history and history data data store.
    *
    * The requests history keeps a daily record of requests made by the application.
@@ -58,13 +59,13 @@ declare namespace LogicElements {
    * `stats.response.headersSize` | `Number` | Response headers size in bytes
    * `stats.response.payloadSize` | `Number` | Response payload size in bytes
    */
-  class ResponseHistorySaver extends Polymer.Element {
+  class ResponseHistorySaver extends PolymerElement {
     readonly _dbData: PouchDB|null;
     connectedCallback(): void;
     disconnectedCallback(): void;
 
     /**
-     * Handler for the `response-ready` event
+     * Handler for the `api-response` event
      */
     _afterRequestHandler(e: CustomEvent|null): void;
 
@@ -194,6 +195,11 @@ declare namespace LogicElements {
   }
 }
 
-interface HTMLElementTagNameMap {
-  "response-history-saver": LogicElements.ResponseHistorySaver;
+declare global {
+
+  interface HTMLElementTagNameMap {
+    "response-history-saver": LogicElements.ResponseHistorySaver;
+  }
 }
+
+export {};

@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 Copyright 2018 The Advanced REST client authors <arc@mulesoft.com>
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -10,10 +10,10 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
--->
-<link rel="import" href="../polymer/polymer-element.html">
-<link rel="import" href="../uuid-generator/uuid-generator.html">
-<script>
+*/
+import {PolymerElement} from '../../@polymer/polymer/polymer-element.js';
+import '../../@advanced-rest-client/uuid-generator/uuid-generator.js';
+import '../../pouchdb/dist/pouchdb.js';
 /**
  * An element that saves requests history in a datastore.
  *
@@ -64,9 +64,7 @@ the License.
  * @demo demo/index.html
  * @memberof LogicElements
  */
-class ResponseHistorySaver extends Polymer.Element {
-  static get is() {return 'response-history-saver';}
-
+class ResponseHistorySaver extends PolymerElement {
   constructor() {
     super();
     this._afterRequestHandler = this._afterRequestHandler.bind(this);
@@ -432,5 +430,4 @@ class ResponseHistorySaver extends Polymer.Element {
     throw new Error(e.message || e);
   }
 }
-window.customElements.define(ResponseHistorySaver.is, ResponseHistorySaver);
-</script>
+window.customElements.define('response-history-saver', ResponseHistorySaver);

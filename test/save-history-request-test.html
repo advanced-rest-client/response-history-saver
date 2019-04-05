@@ -3,12 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-    <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
-    <script src="../../web-component-tester/browser.js"></script>
-    <link rel="import" href="../response-history-saver.html">
-    <link rel="import" href="../../app-pouchdb/pouchdb.html">
-    <link rel="import" href="../../arc-models/request-model.html">
-    <link rel="import" href="../../arc-data-generator/arc-data-generator.html">
+
+    <script src="../../../@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script src="../../../@polymer/test-fixture/test-fixture.js"></script>
+    <script src="../../../mocha/mocha.js"></script>
+    <script src="../../../chai/chai.js"></script>
+    <script src="../../../wct-mocha/wct-mocha.js"></script>
+
   </head>
   <body>
     <request-model></request-model>
@@ -18,8 +19,10 @@
       </template>
     </test-fixture>
 
-    <script>
-    /* global DataGenerator */
+    <script type="module">
+    import '../response-history-saver.js';
+    import '../../../@advanced-rest-client/arc-models/request-model.js';
+    import {DataGenerator} from '../../../@advanced-rest-client/arc-data-generator/arc-data-generator.js';
     suite('Saving history request data', function() {
       let element;
       let request;
