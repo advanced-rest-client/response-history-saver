@@ -423,10 +423,10 @@ class ResponseHistorySaver extends PolymerElement {
       detail: {
         type: 'exception',
         description: message,
-        fatal: true
+        fatal: false
       }
     }));
-    console.error('Url history model', e);
+    console.error('Response history saver', e);
     throw new Error(e.message || e);
   }
 }
