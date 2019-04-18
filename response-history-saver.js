@@ -93,12 +93,12 @@ class ResponseHistorySaver extends PolymerElement {
    * @param {CustomEvent} e
    */
   _afterRequestHandler(e) {
-    const {isError, response, request, timings} = e.detail;
+    const {isError, response, request, timing} = e.detail;
     if (isError) {
       return;
     }
     // Async so the response can be rendered to the user faster.
-    setTimeout(() => this.saveHistory(request, response, timings), 100);
+    setTimeout(() => this.saveHistory(request, response, timing));
   }
   /**
    * Saves request and response data in history.
