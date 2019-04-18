@@ -369,11 +369,11 @@ class ResponseHistorySaver extends PolymerElement {
     if (typeof input === 'string') {
       return input;
     }
-    if (input instanceof Uint8Array) {
-      return input.toString();
-    }
     if (input instanceof ArrayBuffer) {
       return this._arrayBufferToString(input);
+    }
+    if (input instanceof Uint8Array) {
+      return input.toString();
     }
     return result;
   }
@@ -387,23 +387,12 @@ class ResponseHistorySaver extends PolymerElement {
       const b = buffer.slice(0);
       buffer = b.buffer;
     }
-    if ('TextDecoder' in window) {
-      try {
-        const decoder = new TextDecoder('utf-8');
-        const view = new DataView(buffer);
-        return decoder.decode(view);
-      } catch (e) {
-        return '';
-      }
-    }
-    let str = '';
+    const decoder = new TextDecoder();
     try {
-      const array = new Uint8Array(buffer);
-      for (let i = 0; i < array.length; ++i) {
-        str += String.fromCharCode(array[i]);
-      }
-    } catch (e) {}
-    return str;
+      return decoder.decode(buffer);
+    } catch (_) {
+      return '';
+    }
   }
   /**
    * Handles exceptions to log message ad throws the same exception
