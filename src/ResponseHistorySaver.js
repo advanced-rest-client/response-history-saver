@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 Copyright 2018 The Advanced REST client authors <arc@mulesoft.com>
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -10,10 +10,9 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
--->
-<link rel="import" href="../polymer/polymer-element.html">
-<link rel="import" href="../uuid-generator/uuid-generator.html">
-<script>
+*/
+import '@advanced-rest-client/uuid-generator/uuid-generator.js';
+import 'pouchdb/dist/pouchdb.js';
 /**
  * An element that saves requests history in a datastore.
  *
@@ -60,28 +59,10 @@ the License.
  * `stats.response.payloadSize` | `Number` | Response payload size in bytes
  *
  * @customElement
- * @polymer
  * @demo demo/index.html
  * @memberof LogicElements
  */
-class ResponseHistorySaver extends Polymer.Element {
-  static get is() {return 'response-history-saver';}
-
-  constructor() {
-    super();
-    this._afterRequestHandler = this._afterRequestHandler.bind(this);
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    window.addEventListener('api-response', this._afterRequestHandler);
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    window.removeEventListener('api-response', this._afterRequestHandler);
-  }
-
+export class ResponseHistorySaver extends HTMLElement {
   /**
    * @return {PouchDB} A PouchDB instance for the history-data store.
    */
@@ -89,18 +70,44 @@ class ResponseHistorySaver extends Polymer.Element {
     /* global PouchDB */
     return new PouchDB('history-data');
   }
+
+  get uuid() {
+    /* istanbul ignore else */
+    if (!this.__uuid) {
+      this.__uuid = document.createElement('uuid-generator');
+    }
+    return this.__uuid;
+  }
+
+  constructor() {
+    super();
+    this._afterRequestHandler = this._afterRequestHandler.bind(this);
+  }
+
+  connectedCallback() {
+    window.addEventListener('api-response', this._afterRequestHandler);
+    if (!this.hasAttribute('aria-hidden')) {
+      this.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  disconnectedCallback() {
+    window.removeEventListener('api-response', this._afterRequestHandler);
+    this.__uuid = null;
+  }
   /**
    * Handler for the `api-response` event
    *
    * @param {CustomEvent} e
    */
   _afterRequestHandler(e) {
-    const {isError, response, request, timings} = e.detail;
+    const { isError, response, request, timing } = e.detail;
+    /* istanbul ignore if */
     if (isError) {
       return;
     }
     // Async so the response can be rendered to the user faster.
-    setTimeout(() => this.saveHistory(request, response, timings), 100);
+    setTimeout(() => this.saveHistory(request, response, timing));
   }
   /**
    * Saves request and response data in history.
@@ -110,10 +117,13 @@ class ResponseHistorySaver extends Polymer.Element {
    * @param {Object} timings Request timings as HAR 1.2 timings object
    * @return {Promise}
    */
-  saveHistory(request, response, timings) {
-    return this._saveHistoryData(request, response, timings)
-    .then(() => this._updateHistory(request, timings))
-    .catch((cause) => this._handleException(cause));
+  async saveHistory(request, response, timings) {
+    try {
+      await this._saveHistoryData(request, response, timings);
+      return await this._updateHistory(request, timings);
+    } catch (cause) {
+      this._handleException(cause);
+    }
   }
   /**
    * Saves history data for history analysis in the data store.
@@ -125,11 +135,14 @@ class ResponseHistorySaver extends Polymer.Element {
    * @return {Promise} A promise resolved when data were inserted to the
    * datastore.
    */
-  _saveHistoryData(request, response, eventTimings) {
+  async _saveHistoryData(request, response, eventTimings) {
     const doc = this._createHistoryDataModel(request, response, eventTimings);
     const db = this._dbData;
-    return db.put(doc)
-    .catch((e) => this._handleException(e));
+    try {
+      return await db.put(doc);
+    } catch (e) {
+      this._handleException(e);
+    }
   }
   // Creates a data store model for `_saveHistoryData`
   _createHistoryDataModel(request, response, eventTimings) {
@@ -285,7 +298,9 @@ class ResponseHistorySaver extends Polymer.Element {
       url.search = '';
       url.hash = '';
       url = url.toString();
-    } catch (e) {}
+    } catch (e) {
+      // ..
+    }
     if (url) {
       let i = url.indexOf('?');
       if (i !== -1) {
@@ -331,8 +346,10 @@ class ResponseHistorySaver extends Polymer.Element {
       if (code > 0x7f && code <= 0x7ff) {
         s++;
       } else if (code > 0x7ff && code <= 0xffff) {
+        /* istanbul ignore next */
         s += 2;
       }
+      /* istanbul ignore if */
       if (code >= 0xDC00 && code <= 0xDFFF) {
         i--; // trail surrogate
       }
@@ -350,11 +367,9 @@ class ResponseHistorySaver extends Polymer.Element {
    * URL and method.
    */
   _computeHistoryDataId(url, method) {
-    if (!this.__uuid) {
-      this.__uuid = document.createElement('uuid-generator');
-    }
+    const uuid = this.uuid;
     const id = encodeURIComponent(url) + '/' + method + '/' +
-      this.__uuid.generate();
+      uuid.generate();
     return id;
   }
   /**
@@ -364,18 +379,18 @@ class ResponseHistorySaver extends Polymer.Element {
    * @return {String}
    */
   _computePayloadString(input) {
-    let result = '';
+    const result = '';
     if (!input) {
       return result;
     }
     if (typeof input === 'string') {
       return input;
     }
-    if (input instanceof Uint8Array) {
-      return input.toString();
-    }
     if (input instanceof ArrayBuffer) {
       return this._arrayBufferToString(input);
+    }
+    if (input instanceof Uint8Array) {
+      return input.toString();
     }
     return result;
   }
@@ -385,27 +400,16 @@ class ResponseHistorySaver extends Polymer.Element {
    * @return {String} Converted string
    */
   _arrayBufferToString(buffer) {
-    if (!!buffer.buffer) {
+    if (buffer.buffer) {
       const b = buffer.slice(0);
       buffer = b.buffer;
     }
-    if ('TextDecoder' in window) {
-      try {
-        const decoder = new TextDecoder('utf-8');
-        const view = new DataView(buffer);
-        return decoder.decode(view);
-      } catch (e) {
-        return '';
-      }
-    }
-    let str = '';
+    const decoder = new TextDecoder();
     try {
-      const array = new Uint8Array(buffer);
-      for (let i = 0; i < array.length; ++i) {
-        str += String.fromCharCode(array[i]);
-      }
-    } catch (e) {}
-    return str;
+      return decoder.decode(buffer);
+    } catch (_) {
+      return '';
+    }
   }
   /**
    * Handles exceptions to log message ad throws the same exception
@@ -425,12 +429,9 @@ class ResponseHistorySaver extends Polymer.Element {
       detail: {
         type: 'exception',
         description: message,
-        fatal: true
+        fatal: false
       }
     }));
-    console.error('Url history model', e);
     throw new Error(e.message || e);
   }
 }
-window.customElements.define(ResponseHistorySaver.is, ResponseHistorySaver);
-</script>
