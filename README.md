@@ -6,15 +6,12 @@
 
 # response-history-saver
 
-An element that saves requests history in a datastore
+An element that saves requests history in a datastore.
 
-```html
-<response-history-saver></response-history-saver>
-```
+History data is different that request history. It keeps a HAR-like object with history details.
 
-### API components
-
-This components is a part of [API components ecosystem](https://elements.advancedrestclient.com/)
+The element handles `api-response` event and transforms response into a data object and stores in `history-data` datastore.
+Originally it was designed to support API assistant, however this was removed in ARC 10 and currently it has no practical use in ARC. It may change in the future.
 
 ## Usage
 
@@ -23,29 +20,14 @@ This components is a part of [API components ecosystem](https://elements.advance
 npm install --save @advanced-rest-client/response-history-saver
 ```
 
-### In an html file
-
-```html
-<html>
-  <head>
-    <script type="module">
-      import '@advanced-rest-client/response-history-saver/response-history-saver.js';
-    </script>
-  </head>
-  <body>
-    <response-history-saver></response-history-saver>
-  </body>
-</html>
-```
-
-### In a Polymer 3 element
+### In a LitElement
 
 ```js
-import {PolymerElement, html} from '@polymer/polymer';
+import { LitElement, html } from 'lit-element';
 import '@advanced-rest-client/response-history-saver/response-history-saver.js';
 
-class SampleElement extends PolymerElement {
-  static get template() {
+class SampleElement extends LitElement {
+  render() {
     return html`
     <response-history-saver></response-history-saver>
     `;
@@ -54,23 +36,20 @@ class SampleElement extends PolymerElement {
 customElements.define('sample-element', SampleElement);
 ```
 
-### Installation
+## Development
 
 ```sh
 git clone https://github.com/advanced-rest-client/response-history-saver
-cd api-url-editor
+cd response-history-saver
 npm install
-npm install -g polymer-cli
-```
-
-### Running the demo locally
-
-```sh
-polymer serve --npm
-open http://127.0.0.1:<port>/demo/
 ```
 
 ### Running the tests
+
 ```sh
-polymer test --npm
+npm test
 ```
+
+## API components
+
+This components is a part of [API components ecosystem](https://elements.advancedrestclient.com/)
