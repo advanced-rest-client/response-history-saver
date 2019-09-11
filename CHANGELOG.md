@@ -105,3 +105,7 @@
 
 
 
+# [3.0.0](https://github.com/advanced-rest-client/response-history-saver/compare/0.0.3...3.0.0) (2019-09-11)
+
+
+
