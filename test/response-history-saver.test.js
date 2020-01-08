@@ -1,5 +1,5 @@
 import { fixture, assert, html, aTimeout } from '@open-wc/testing';
-import * as sinon from 'sinon/pkg/sinon-esm.js';
+import * as sinon from 'sinon';
 import { DataGenerator } from '@advanced-rest-client/arc-data-generator/arc-data-generator.js';
 import '@advanced-rest-client/arc-models/request-model.js';
 import '../response-history-saver.js';
@@ -458,22 +458,6 @@ describe('<response-history-saver>', function() {
     let element;
     let request;
     let timings;
-    function initVariables() {
-      request = {
-        url: 'https://domain.com/path/?query=value',
-        method: 'POST',
-        payload: 'hello world',
-        headers: 'content-type: text/plain\ncontent-length: 11'
-      };
-      timings = {
-        connect: 2.008,
-        receive: 24.1769,
-        send: 96.1234,
-        ssl: 11,
-        wait: 54.512,
-        startTime: 1499427973215
-      };
-    }
 
     describe('_updateHistory()', function() {
       after(async () => {
@@ -482,7 +466,20 @@ describe('<response-history-saver>', function() {
 
       beforeEach(async () => {
         element = await modelFixture();
-        initVariables();
+        request = {
+          url: 'https://domain.com/path/?query=value',
+          method: 'POST',
+          payload: 'hello world',
+          headers: 'content-type: text/plain\ncontent-length: 11'
+        };
+        timings = {
+          connect: 2.008,
+          receive: 24.1769,
+          send: 96.1234,
+          ssl: 11,
+          wait: 54.512,
+          startTime: 1499427973215
+        };
       });
 
       let insertedObject;
@@ -497,6 +494,123 @@ describe('<response-history-saver>', function() {
         const doc = await element._updateHistory(request, timings)
         assert.equal(doc._id, insertedObject._id);
         assert.notEqual(doc._rev, insertedObject._rev);
+      });
+
+      it('saves auth data', async () => {
+        const authType = request.authType = 'client certificate';
+        const auth = request.auth = { id: 'test' };
+        const doc = await element._updateHistory(request, timings)
+        assert.equal(doc.authType, authType);
+        assert.deepEqual(doc.auth, auth);
+      });
+
+      it('saves config data', async () => {
+        request.url += '&d=' + Date.now();
+        const config = request.config = {
+          timeout: 10
+        };
+        const doc = await element._updateHistory(request, timings)
+        assert.deepEqual(doc.config, config);
+      });
+
+      it('saves requestActions data', async () => {
+        request.url += '&d=' + Date.now();
+        const requestActions = request.requestActions = {
+          veriables: [
+            {
+              test: true
+            }
+          ]
+        };
+        const doc = await element._updateHistory(request, timings)
+        assert.deepEqual(doc.requestActions, requestActions);
+      });
+
+      it('saves responseActions data', async () => {
+        request.url += '&d=' + Date.now();
+        const responseActions = request.responseActions = [
+          {
+            test: true
+          }
+        ];
+        const doc = await element._updateHistory(request, timings)
+        assert.deepEqual(doc.responseActions, responseActions);
+      });
+
+      it('saves response data', async () => {
+        request.url += '&d=' + Date.now();
+        const enc = new TextEncoder();
+        const payload = enc.encode('test');
+        const response = request.response = {
+          headers: 'Content-Type: application/json; charset=UTF-8',
+          payload,
+          stats: { connect: 23, receive: 4, send: 1, wait: 3, dns: 4, },
+          status: 401,
+          statusText: 'Forbidden',
+          url: 'https://localhost:8345/',
+        };
+        const doc = await element._updateHistory(request, timings)
+        response.payload = 'dGVzdA==';
+        assert.deepEqual(doc.response, response);
+      });
+
+      it('saves response data from _response', async () => {
+        request.url += '&d=' + Date.now();
+        const enc = new TextEncoder();
+        const payload = enc.encode('test');
+        const response = request._response = {
+          headers: 'Content-Type: application/json; charset=UTF-8',
+          payload,
+          stats: { connect: 23, receive: 4, send: 1, wait: 3, dns: 4, },
+          status: 401,
+          statusText: 'Forbidden',
+          url: 'https://localhost:8345/',
+        };
+        const doc = await element._updateHistory(request, timings)
+        response.payload = 'dGVzdA==';
+        assert.deepEqual(doc.response, response);
+      });
+
+      it('saves isErrorResponse', async () => {
+        request.url += '&d=' + Date.now();
+        request.isErrorResponse = false;
+        const doc = await element._updateHistory(request, timings);
+        assert.isFalse(doc.isErrorResponse);
+      });
+
+      it('saves isErrorResponse data from _isErrorResponse', async () => {
+        request.url += '&d=' + Date.now();
+        request._isErrorResponse = false;
+        const doc = await element._updateHistory(request, timings);
+        assert.isFalse(doc.isErrorResponse);
+      });
+
+      it('saves responseMeta', async () => {
+        request.url += '&d=' + Date.now();
+        const responseMeta = request.responseMeta = { loadingTime: 10 };
+        const doc = await element._updateHistory(request, timings);
+        assert.deepEqual(doc.responseMeta, responseMeta);
+      });
+
+      it('saves responseMeta data from _responseMeta', async () => {
+        request.url += '&d=' + Date.now();
+        const responseMeta = request._responseMeta = { loadingTime: 10 };
+        const doc = await element._updateHistory(request, timings);
+        assert.deepEqual(doc.responseMeta, responseMeta);
+      });
+
+      it('saves state', async () => {
+        request.url += '&d=' + Date.now();
+        const state = request.state = { collapseOpened: true };
+        const doc = await element._updateHistory(request, timings);
+        assert.deepEqual(doc.state, state);
+      });
+
+      it('saves state data from _state', async () => {
+        request.url += '&d=' + Date.now();
+        const state = request._state = { collapseOpened: true };
+        const doc = await element._updateHistory(request, timings);
+        assert.deepEqual(doc.state, state);
       });
     });
   });

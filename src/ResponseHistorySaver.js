@@ -218,6 +218,33 @@ export class ResponseHistorySaver extends HTMLElement {
       payload: request.payload,
       url: request.url
     };
+    if (request.auth && request.authType) {
+      doc.auth = request.auth;
+      doc.authType = request.authType;
+    }
+    if (request.config) {
+      doc.config = request.config;
+    }
+    if (request.requestActions) {
+      doc.requestActions = request.requestActions;
+    }
+    if (request.responseActions && request.responseActions.length) {
+      doc.responseActions = request.responseActions;
+    }
+    if (request._response || request.response) {
+      doc.response = this._prepareResponse(request._response || request.response);
+    }
+    if (request._responseMeta || request.responseMeta) {
+      doc.responseMeta = request._responseMeta || request.responseMeta;
+    }
+    if (request._state || request.state) {
+      doc.state = request._state || request.state;
+    }
+    if (typeof request._isErrorResponse === 'boolean') {
+      doc.isErrorResponse = request._isErrorResponse;
+    } else if (typeof request.isErrorResponse === 'boolean') {
+      doc.isErrorResponse = request.isErrorResponse;
+    }
     const e = new CustomEvent('save-history', {
       bubbles: true,
       composed: true,
@@ -231,6 +258,27 @@ export class ResponseHistorySaver extends HTMLElement {
       return Promise.reject(new Error('request model not found'));
     }
     return e.detail.result;
+  }
+  /**
+   * Replaces buffer with base64 string in response's payload
+   * @param {Object} response ARC response object
+   * @return {Object} Copy of the object
+   */
+  _prepareResponse(response) {
+    const { payload } = response;
+    if (!payload) {
+      return response;
+    }
+    response = Object.assign({}, response);
+    if (payload.asciiSlice) {
+      // node's buffer
+      response.payload = payload.toString('base64');
+    }
+    if (payload.byteLength) {
+      // Array buffer
+      response.payload = btoa(String.fromCharCode(...payload));
+    }
+    return response;
   }
   /**
    * Computes a valid timings object as descrived in HAR 1.2 spec.
