@@ -1,3 +1,9 @@
+___
+
+This component is deprecated and the loc moved to `arc-models`.
+
+___
+
 [![Published on NPM](https://img.shields.io/npm/v/@advanced-rest-client/response-history-saver.svg)](https://www.npmjs.com/package/@advanced-rest-client/response-history-saver)
 
 [![Build Status](https://travis-ci.org/advanced-rest-client/response-history-saver.svg?branch=stage)](https://travis-ci.org/advanced-rest-client/response-history-saver)
